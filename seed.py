@@ -4,11 +4,11 @@ from app.models import Song
 Base.metadata.create_all(bind=engine)
 
 songs = [
-    Song(title="Song One", artist="Artist A", album="Single",
+    Song(title="Football-Football Music", artist="SigmaMusicart", album="Single",
          audio_file="/static/audio/track1.mp3"),
-    Song(title="Song Two", artist="Artist B", album="Single",
+    Song(title="Dark", artist="AudioCopper", album="Single",
          audio_file="/static/audio/track2.mp3"),
-    Song(title="Song Three", artist="Artist C", album="Single",
+    Song(title="Wonders of the Earth", artist="Grand_Project", album="Single",
          audio_file="/static/audio/track3.mp3"),
 ]
 

@@ -1,7 +1,13 @@
 from fastapi import FastAPI
 
-app= FastAPI(title="spotify clone")
+from .database import Base, engine
+from . import models
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Spotify Clone")
+
 
 @app.get("/")
 def home():
-    return{"message":"spotify clone is running!"}
+    return {"message": "Spotify clone is running!"}

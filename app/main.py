@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
@@ -9,11 +10,12 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Spotify Clone")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/")
-def home():
-    return {"message": "Spotify clone is running!"}
+def home(request: Request):
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.get("/api/songs", response_model=list[schemas.SongOut])

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Spotify Clone</title>
+    <style>
+        body {
+            background: #121212;
+            color: #fff;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 24px 24px 140px;
+        }
+
+        h1 {
+            color: #1db954;
+        }
+
+        .song {
+            padding: 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .song:hover {
+            background: #2a2a2a;
+        }
+
+        .song.active {
+            background: #1db954;
+            color: #000;
+        }
+
+        .player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #181818;
+            padding: 16px 24px;
+        }
+
+        .controls {
+            margin-top: 8px;
+        }
+
+        button {
+            background: #1db954;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 18px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Spotify Clone</h1>
+    <div id="songs"></div>
+
+    <div class="player">
+        <div id="now-playing">Pick a song to start</div>
+        <audio id="audio" controls></audio>
+        <div class="controls">
+            <button id="prev">Previous</button>
+            <button id="next">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let songs = [];
+        let current = -1;
+
+        const list = document.getElementById("songs");
+        const audio = document.getElementById("audio");
+        const nowPlaying = document.getElementById("now-playing");
+
+        async function loadSongs() {
+            const response = await fetch("/api/songs");
+            songs = await response.json();
+            render();
+        }
+
+        function render() {
+            list.innerHTML = "";
+            songs.forEach((song, i) => {
+                const row = document.createElement("div");
+                row.className = "song" + (i === current ? " active" : "");
+                row.textContent = song.title + " - " + song.artist;
+                row.onclick = () => play(i);
+                list.appendChild(row);
+            });
+        }
+
+        function play(i) {
+            current = i;
+            audio.src = songs[i].audio_file;
+            audio.play();
+            nowPlaying.textContent = "Now playing: " + songs[i].title + " - " + songs[i].artist;
+            render();
+        }
+
+        document.getElementById("next").onclick = () => play((current + 1) % songs.length);
+        document.getElementById("prev").onclick = () => play((current - 1 + songs.length) % songs.length);
+        audio.addEventListener("ended", () => play((current + 1) % songs.length));
+
+        loadSongs();
+    </script>
+</body>
+
+</html>

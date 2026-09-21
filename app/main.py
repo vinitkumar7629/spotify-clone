@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
 from . import models, schemas
+from .seeding import seed_if_empty  
 
 Base.metadata.create_all(bind=engine)
+seed_if_empty()  # Seed the database if it's empty
 
 app = FastAPI(title="Spotify Clone")
 app.mount("/static", StaticFiles(directory="static"), name="static")

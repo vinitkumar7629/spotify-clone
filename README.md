@@ -1,4 +1,6 @@
 # Spotify Clone
+  **Live demo:** https://spotify-clone-sftm.onrender.com
+  (Free hosting: the first load may take about a minute while the server wakes up.)
 
 A simple music player web app. Songs are stored in a database, served through a REST API, and played in the browser.
 

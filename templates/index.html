@@ -17,6 +17,18 @@
             color: #1db954;
         }
 
+        #search {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border: none;
+            border-radius: 20px;
+            background: #2a2a2a;
+            color: #fff;
+            font-size: 16px;
+        }
+
         .song {
             padding: 12px 16px;
             border-radius: 6px;
@@ -63,6 +75,7 @@
 
 <body>
     <h1>Spotify Clone</h1>
+    <input id="search" type="text" placeholder="Search by title, artist or album">
     <div id="songs"></div>
 
     <div class="player">
@@ -76,40 +89,60 @@
 
     <script>
         let songs = [];
-        let current = -1;
+        let currentId = null;
+        let debounceTimer;
 
         const list = document.getElementById("songs");
         const audio = document.getElementById("audio");
         const nowPlaying = document.getElementById("now-playing");
+        const searchInput = document.getElementById("search");
 
-        async function loadSongs() {
-            const response = await fetch("/api/songs");
-            songs = await response.json();
+        async function loadSongs(q = "") {
+            const response = await fetch("/api/songs/search?q=" + encodeURIComponent(q));
+            const results = await response.json();
+            if (q !== searchInput.value.trim()) return; // a newer search replaced this one
+            songs = results;
             render();
         }
 
         function render() {
             list.innerHTML = "";
-            songs.forEach((song, i) => {
+            if (songs.length === 0) {
+                list.textContent = "No songs found";
+                return;
+            }
+            songs.forEach((song) => {
                 const row = document.createElement("div");
-                row.className = "song" + (i === current ? " active" : "");
+                row.className = "song" + (song.id === currentId ? " active" : "");
                 row.textContent = song.title + " - " + song.artist;
-                row.onclick = () => play(i);
+                row.onclick = () => play(song);
                 list.appendChild(row);
             });
         }
 
-        function play(i) {
-            current = i;
-            audio.src = songs[i].audio_file;
+        function play(song) {
+            currentId = song.id;
+            audio.src = song.audio_file;
             audio.play();
-            nowPlaying.textContent = "Now playing: " + songs[i].title + " - " + songs[i].artist;
+            nowPlaying.textContent = "Now playing: " + song.title + " - " + song.artist;
             render();
         }
 
-        document.getElementById("next").onclick = () => play((current + 1) % songs.length);
-        document.getElementById("prev").onclick = () => play((current - 1 + songs.length) % songs.length);
-        audio.addEventListener("ended", () => play((current + 1) % songs.length));
+        function step(direction) {
+            if (songs.length === 0) return;
+            const i = songs.findIndex((s) => s.id === currentId);
+            const next = i === -1 ? 0 : (i + direction + songs.length) % songs.length;
+            play(songs[next]);
+        }
+
+        searchInput.addEventListener("input", () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => loadSongs(searchInput.value.trim()), 300);
+        });
+
+        document.getElementById("next").onclick = () => step(1);
+        document.getElementById("prev").onclick = () => step(-1);
+        audio.addEventListener("ended", () => step(1));
 
         loadSongs();
     </script>
